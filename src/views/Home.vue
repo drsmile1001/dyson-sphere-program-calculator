@@ -10,7 +10,7 @@
         <th>輸出</th>
         <th>費時</th>
         <th>套用數量</th>
-        <th>動作</th>
+        <th>固定</th>
       </tr>
     </thead>
     <tbody>
@@ -31,11 +31,12 @@
           <input type="number" v-model.number="recipe.apply" />
         </td>
         <td>
-          <button @click="slow(recipe)">抑制輸出</button>
+          <input type="checkbox" v-model="recipe.fix" />
         </td>
       </tr>
     </tbody>
   </table>
+  <button @click="adapt">適應</button>
   <h2>資源變動</h2>
   <table>
     <thead>
@@ -75,6 +76,7 @@ interface Recipe {
 
 type RecipeApply = Recipe & {
   apply: number;
+  fix: boolean;
 };
 
 const recipes: Recipe[] = [
@@ -173,27 +175,35 @@ export default defineComponent({
       .map((r) =>
         Object.assign(r, {
           apply: 0,
+          fix: false,
         })
       )
       .forEach((r) => {
         state.recipes.push(r);
       });
 
-    function slow(r: RecipeApply) {
-      const output = r.outputs[0];
-      const change = changes.value.find((c) => c.resource === output.resource);
-      console.log(change);
+    function adapt() {
+      for (let round = 0; round < 10; round++) {
+        changes.value.forEach((change) => {
+          if (change.changes < 0.0001 && change.changes > -0.0001) return;
+          const recipe = state.recipes.find(
+            (r) => r.outputs[0].resource === change.resource
+          );
+          if (!recipe || recipe.fix) return;
 
-      if (change === undefined) return;
-      const slowAmout = change.changes / (output.amount * state.processTimes);
-      console.log(slowAmout);
-      r.apply -= slowAmout;
+          const adaptAmount =
+            change.changes /
+            ((recipe?.outputs[0].amount * state.processTimes) /
+              recipe.processTimes);
+          recipe.apply -= adaptAmount;
+        });
+      }
     }
 
     return {
       ...toRefs(state),
       changes,
-      slow,
+      adapt,
     };
   },
 });
