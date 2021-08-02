@@ -133,6 +133,12 @@ const recipes: Recipe[] = [
     processTimes: 1,
   },
   {
+    name: "齒輪（製造）",
+    inputs: [{ resource: "鐵塊", amount: 1 }],
+    outputs: [{ resource: "齒輪", amount: 1 }],
+    processTimes: 1,
+  },
+  {
     name: "電路板（製造）",
     inputs: [
       { resource: "鐵塊", amount: 2 },
@@ -160,6 +166,16 @@ const recipes: Recipe[] = [
     ],
     outputs: [{ resource: "電弧熔爐", amount: 1 }],
     processTimes: 3,
+  },
+  {
+    name: "製造臺MK.I（製造）",
+    inputs: [
+      { resource: "鐵塊", amount: 4 },
+      { resource: "齒輪", amount: 8 },
+      { resource: "電路板", amount: 4 },
+    ],
+    outputs: [{ resource: "製造臺MK.I", amount: 1 }],
+    processTimes: 2,
   },
 ];
 
