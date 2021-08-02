@@ -1,8 +1,8 @@
 <template>
-  <h2>經過時間</h2>
-  <input v-model.number="processTimes" type="number" />
-  <h2>配方</h2>
-  <table>
+  <h2 class="text-3xl mb-2 font-semibold">經過時間</h2>
+  <input v-model.number="processTimes" class="border" type="number" />
+  <h2 class="text-3xl mb-2 font-semibold">配方</h2>
+  <table class="w-full mb-2 divide-y-2">
     <thead>
       <tr>
         <th>名稱</th>
@@ -10,48 +10,76 @@
         <th>輸出</th>
         <th>費時</th>
         <th>套用數量</th>
+        <th>調整數量</th>
         <th>固定</th>
       </tr>
     </thead>
-    <tbody>
-      <tr v-for="(recipe, i) in recipes" :key="i">
-        <td>{{ recipe.name }}</td>
-        <td>
+    <tbody class="divide-y-2">
+      <tr v-for="(recipe, i) in recipes" :key="i" class="hover:bg-gray-100">
+        <td class="p-1">{{ recipe.name }}</td>
+        <td class="p-1">
           <span v-for="r in recipe.inputs" :key="r">
             {{ r.resource }} x {{ r.amount }}
           </span>
         </td>
-        <td>
+        <td class="p-1">
           <span v-for="r in recipe.outputs" :key="r">
             {{ r.resource }} x {{ r.amount }}
           </span>
         </td>
-        <td>{{ recipe.processTimes }}</td>
-        <td>
-          <input type="number" v-model.number="recipe.apply" />
+        <td class="text-right p-1">{{ recipe.processTimes }}</td>
+        <td class="text-center p-1">
+          {{ numberFormatter(recipe.apply) }}
         </td>
-        <td>
+        <td class="p-1">
+          <div class="flex justify-around">
+            <button
+              class="bg-gray-100 hover:bg-gray-200 py-1 px-2"
+              @click="adjestAmount(recipe, -1)"
+            >
+              -1
+            </button>
+            <button
+              class="bg-gray-100 hover:bg-gray-200 py-1 px-2"
+              @click="adjestAmount(recipe)"
+            >
+              0
+            </button>
+            <button
+              class="bg-gray-100 hover:bg-gray-200 py-1 px-2"
+              @click="adjestAmount(recipe, 1)"
+            >
+              +1
+            </button>
+          </div>
+        </td>
+        <td class="text-center">
           <input type="checkbox" v-model="recipe.fix" />
         </td>
       </tr>
     </tbody>
   </table>
-  <button @click="adapt">適應</button>
-  <h2>資源變動</h2>
-  <table>
+  <div class="flex justify-end">
+    <button class="bg-gray-100 hover:bg-gray-200 py-1 px-2" @click="adapt">
+      適應
+    </button>
+  </div>
+
+  <h2 class="text-3xl mb-2 font-semibold">資源變動</h2>
+  <table class="w-1/4 mb-2 divide-y-2">
     <thead>
       <tr>
         <th>資源</th>
         <th>變動量</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody class="divide-y-2">
       <tr v-for="(change, i) in changes" :key="i">
-        <td>
+        <td class="p-1">
           {{ change.resource }}
         </td>
-        <td>
-          {{ change.changes }}
+        <td class="text-right p-1">
+          {{ numberFormatter(change.changes) }}
         </td>
       </tr>
     </tbody>
@@ -148,14 +176,14 @@ export default defineComponent({
       state.recipes.forEach((r) => {
         if (!r.apply) return;
         r.inputs.forEach((i) => {
-          const change = (state.processTimes / r.processTimes) * i.amount;
+          const change = (state.processTimes * i.amount) / r.processTimes;
           resourceChanges.set(
             i.resource,
             (resourceChanges.get(i.resource) ?? 0) - change * r.apply
           );
         });
         r.outputs.forEach((o) => {
-          const change = (state.processTimes / r.processTimes) * o.amount;
+          const change = (state.processTimes * o.amount) / r.processTimes;
           resourceChanges.set(
             o.resource,
             (resourceChanges.get(o.resource) ?? 0) + change * r.apply
@@ -200,10 +228,21 @@ export default defineComponent({
       }
     }
 
+    function numberFormatter(v: number) {
+      return parseFloat(v.toFixed(4)).toString();
+    }
+
+    function adjestAmount(r: RecipeApply, a?: number) {
+      if (a) r.apply += a;
+      else r.apply = 0;
+    }
+
     return {
       ...toRefs(state),
       changes,
       adapt,
+      numberFormatter,
+      adjestAmount,
     };
   },
 });
