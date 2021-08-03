@@ -18,13 +18,13 @@
       <tr v-for="(recipe, i) in recipes" :key="i" class="hover:bg-gray-100">
         <td class="p-1">{{ recipe.name }}</td>
         <td class="p-1">
-          <span v-for="r in recipe.inputs" :key="r">
-            {{ r.resource }} x {{ r.amount }}
-          </span>
+          <div v-for="r in recipe.inputs" :key="r">
+            <Resource :resource="r.resource" /> x {{ r.amount }}
+          </div>
         </td>
         <td class="p-1">
           <span v-for="r in recipe.outputs" :key="r">
-            {{ r.resource }} x {{ r.amount }}
+            <Resource :resource="r.resource" /> x {{ r.amount }}
           </span>
         </td>
         <td class="text-right p-1">{{ recipe.processTimes }}</td>
@@ -89,6 +89,7 @@
 <script lang="ts">
 import { computed, defineComponent, reactive, toRefs } from "vue";
 import { Recipe, recipes } from "@/Recipe";
+import Resource from "./Resource.vue";
 
 type RecipeApply = Recipe & {
   apply: number;
@@ -97,6 +98,9 @@ type RecipeApply = Recipe & {
 
 export default defineComponent({
   name: "Home",
+  components: {
+    Resource,
+  },
   setup() {
     const state = reactive({
       recipes: [] as RecipeApply[],
