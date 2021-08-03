@@ -2,6 +2,7 @@
   <h2 class="text-3xl mb-2 font-semibold">經過時間</h2>
   <input v-model.number="processTimes" class="border" type="number" />
   <h2 class="text-3xl mb-2 font-semibold">配方</h2>
+  只呈現套用配方 <input type="checkbox" v-model="applyOnly" />
   <table class="w-full mb-2 divide-y-2">
     <thead>
       <tr>
@@ -15,17 +16,31 @@
       </tr>
     </thead>
     <tbody class="divide-y-2">
-      <tr v-for="(recipe, i) in recipes" :key="i" class="hover:bg-gray-100">
+      <tr
+        v-for="(recipe, i) in filteredRecipes"
+        :key="i"
+        class="hover:bg-gray-100"
+      >
         <td class="p-1">{{ recipe.name }}</td>
         <td class="p-1">
-          <div v-for="r in recipe.inputs" :key="r">
-            <Resource :resource="r.resource" /> x {{ r.amount }}
+          <div class="flex">
+            <Resource
+              v-for="r in recipe.inputs"
+              :key="r"
+              :resource="r.resource"
+              :num="r.amount"
+            />
           </div>
         </td>
         <td class="p-1">
-          <span v-for="r in recipe.outputs" :key="r">
-            <Resource :resource="r.resource" /> x {{ r.amount }}
-          </span>
+          <div class="flex">
+            <Resource
+              v-for="r in recipe.outputs"
+              :key="r"
+              :resource="r.resource"
+              :num="r.amount"
+            />
+          </div>
         </td>
         <td class="text-right p-1">{{ recipe.processTimes }}</td>
         <td class="text-center p-1">
@@ -76,7 +91,7 @@
     <tbody class="divide-y-2">
       <tr v-for="(change, i) in changes" :key="i">
         <td class="p-1">
-          {{ change.resource }}
+          <Resource :resource="change.resource" />
         </td>
         <td class="text-right p-1">
           {{ numberFormatter(change.changes) }}
@@ -105,7 +120,12 @@ export default defineComponent({
     const state = reactive({
       recipes: [] as RecipeApply[],
       processTimes: 1,
+      applyOnly: false,
     });
+
+    const filteredRecipes = computed(() =>
+      state.recipes.filter((r) => !state.applyOnly || r.apply > 0)
+    );
 
     const changes = computed(() => {
       const resourceChanges = new Map<string, number>();
@@ -179,6 +199,7 @@ export default defineComponent({
       adapt,
       numberFormatter,
       adjestAmount,
+      filteredRecipes,
     };
   },
 });

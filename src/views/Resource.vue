@@ -1,7 +1,14 @@
 <template>
-  <div>
-    <img v-if="image" class="w-10" :src="image" :alt="resource" />
-    <div v-else>{{ resource }}</div>
+  <div class="resource w-7 h-7 relative">
+    <a :title="resource">
+      <img v-if="image" :src="image" :alt="resource" />
+      <div class="text-xs" v-else>{{ resource }}</div>
+      <span
+        class="absolute right-0 bottom-0 text-xs bg-white rounded-md"
+        v-if="num !== undefined"
+        >{{ num }}</span
+      >
+    </a>
   </div>
 </template>
 
@@ -17,6 +24,7 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    num: Number,
   },
   setup(props) {
     const image = computed(
